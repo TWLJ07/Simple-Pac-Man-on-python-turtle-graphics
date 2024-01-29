@@ -1,0 +1,2022 @@
+import turtle
+import time
+import random
+import pickle
+
+
+level = 1  # important to start game everylevel
+
+
+# --------------------------------------functions-----------------------
+def readMap():
+    global map
+    mapFile = open('pacman.txt', 'r')  # r = read
+    for line in mapFile:
+        tempmap = line.strip('\n')  # remove all 'new line' hidden characters
+        tempmap = list(tempmap)  # turn this line into a list
+        map.append(tempmap)
+    mapFile.close()
+    return
+
+
+def useMap():
+    gridSquare.showturtle()
+    for row in range(len(map)):
+        for col in range(len(map[row])):
+            gridSquare.goto(coordinates[row][col])
+            if map[row][col] == '1':
+                gridSquare.fillcolor('blue')
+            elif map[row][col] == '2':
+                gridSquare.fillcolor('pink')
+            elif map[row][col] == '0':
+                gridSquare.fillcolor('black')
+            elif map[row][col] == '3':
+                gridSquare.fillcolor('black')
+            gridSquare.stamp()
+    gridSquare.hideturtle()
+    myWin.update()
+    return
+
+
+def leave():
+    global quitFlag
+    quitFlag = True
+    return
+
+
+def whichSquare(x, y):
+    indexX = 100000
+    indexY = 100000
+    dist = 100000000
+    for row in range(len(coordinates)):
+        for col in range(len(coordinates[row])):
+            currX = coordinates[row][col][0]
+            currY = coordinates[row][col][1]
+            currDist = ((x - currX) ** 2 + (y - currY) ** 2) ** 0.5
+            if currDist < dist:
+                dist = currDist
+                indexX = col
+                indexY = row
+    return indexY, indexX
+
+
+def turnUp():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacxcord = pacman.xcor()
+    if map[row - 1][col] == '0':
+        if pacxcord == coordinates[row][col][0]:
+            pacmenheading = 90
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnDown():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacxcord = pacman.xcor()
+    if map[row + 1][col] == '0':
+        if pacxcord == coordinates[row][col][0]:
+            pacmenheading = 270
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnLeft():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacycord = pacman.ycor()
+    if map[row][col - 1] == '0':
+        if pacycord == coordinates[row][col][1]:
+            pacmenheading = 180
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnRight():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacycord = pacman.ycor()
+    if map[row][col + 1] == '0':
+        if pacycord == coordinates[row][col][1]:
+            pacmenheading = 0
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnUphold():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacxcord = pacman.xcor()
+    if map[row - 1][col] == '0':
+        if pacxcord == coordinates[row][col][0]:
+            pacmenheading = 90
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnDownhold():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacxcord = pacman.xcor()
+    if map[row + 1][col] == '0':
+        if pacxcord == coordinates[row][col][0]:
+            pacmenheading = 270
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnLefthold():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacycord = pacman.ycor()
+    if map[row][col - 1] == '0':
+        if pacycord == coordinates[row][col][1]:
+            pacmenheading = 180
+            pacman.setheading(pacmenheading)
+    return
+
+
+def turnRighthold():
+    global pacmenheading
+    pacxcord = pacman.xcor()
+    pacycord = pacman.ycor()
+    row, col = whichSquare(pacxcord, pacycord)
+    pacycord = pacman.ycor()
+    if map[row][col + 1] == '0':
+        if pacycord == coordinates[row][col][1]:
+            pacmenheading = 0
+            pacman.setheading(pacmenheading)
+    return
+
+
+def movePacMan():
+    global pacmenheading, pacmanspeed, powerorbsavalible, pacmancurrrow, pacmancurrcol, score, ghostrunawayiepacmankill, ghostchase, ghostscatter, ghostchasetimelol, level
+    pacxcord = int(pacman.xcor())
+    pacycord = int(pacman.ycor())
+    row, col = whichSquare(pacxcord, pacycord)
+    pacmancurrrow = row
+    pacmancurrcol = col
+    if pacmenheading == 0:
+        if pacxcord > 290 and pacycord == 16:
+            pacman.goto(pacxcord + 12, pacycord)
+            if pacxcord == 321 and pacycord == 16:
+                pacman.goto(-327, 16)
+        else:
+            x = coordinates[row][col + 1][0]
+            if map[row][col + 1] == '1':
+                if int(pacman.xcor() + 24) == x:
+                    pacman.goto(coordinates[row][col][0], coordinates[row][col][1])
+                else:
+                    pacman.goto(pacxcord + 12, pacycord)
+            else:
+                pacman.goto(pacxcord + 12, pacycord)
+    if pacmenheading == 90:
+        y = coordinates[row - 1][col][1]
+        if map[row - 1][col] == '1':
+            if int(pacman.ycor() + 24) == y:
+                pacman.goto(coordinates[row][col][0], coordinates[row][col][1])
+            else:
+                pacman.goto(pacxcord, pacycord + 12)
+        else:
+            pacman.goto(pacxcord, pacycord + 12)
+    if pacmenheading == 180:
+        if pacxcord == -327 and pacycord == 16:
+            pacman.goto(321, 16)
+        else:
+            x = coordinates[row][col - 1][0]
+            if map[row][col - 1] == '1':
+                if int(pacman.xcor() - 24) == x:
+                    pacman.goto(coordinates[row][col][0], coordinates[row][col][1])
+                else:
+                    pacman.goto(pacxcord - 12, pacycord)
+            else:
+                pacman.goto(pacxcord - 12, pacycord)
+    if pacmenheading == 270:
+        y = coordinates[row + 1][col][1]
+        if map[row + 1][col] == '1':
+            if int(pacman.ycor() - 24) == y:
+                pacman.goto(coordinates[row][col][0], coordinates[row][col][1])
+            else:
+                pacman.goto(pacxcord, pacycord - 12)
+        else:
+            pacman.goto(pacxcord, pacycord - 12)
+    if powerorbs[row][col] != '0':
+        if row == 6 and col == 1 or row == 6 and col == 26 or row == 29 and col == 1 or row == 29 and col == 26:
+            powerorbs[row][col].hideturtle()
+            powerorbs[row][col] = '0'
+            powerorbsavalible -= 1
+            score += 50
+            ghostrunawayiepacmankill = True
+            ghostchase = False
+            ghostscatter = False
+            ghostchasetimelol = True
+            timerforghosts()
+        else:
+            powerorbs[row][col].hideturtle()
+            powerorbs[row][col] = '0'
+            powerorbsavalible -= 1
+            score += 10
+    firsttime1 = True
+    firsttime2 = True
+    firsttime3 = True
+    if powerorbsavalible == 198 and firsttime1 == True:
+        pinkghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        firsttime1 = False
+    if powerorbsavalible == 150 and firsttime2 == True:
+        blueghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        firsttime2 = False
+    if powerorbsavalible == 102 and firsttime3 == True:
+        orangeghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        firsttime3 = False
+    if powerorbsavalible == 0:
+        if level != 3:
+            myWin.update()
+            level += 1
+            newlevel()
+            moveArrow()
+            myWin.update()
+            time.sleep(3)
+        else:
+            myWin.clearscreen()
+            pacman.hideturtle()
+            pacman.color('black')
+            pacman.goto(-240, 0)
+            pacman.write('You Win, Your score was ' + str(score), font=("Times New Roman", 30, "normal"))
+            myWin.update()
+            time.sleep(5)
+            myWin.bye()
+    return
+
+
+def moveRedGhost():
+    global pacmancurrrow, pacmancurrcol, ghostchase, ghostscatter, ghostrunawayiepacmankill, reddead, powerorbs
+    redghostxcord = int(redghost.xcor())
+    redghostycord = int(redghost.ycor())
+    row, col = whichSquare(redghostxcord, redghostycord)
+    redghostcurrrow = row
+    redghostcurrcol = col
+    redghostheadingfor = redghost.heading()
+    if redghostheadingfor == 0:
+        if redghostcurrrow == 17 and redghostcurrcol == 26:
+            redghost.goto(coordinates[17][1][0], coordinates[17][1][1])
+            return
+    if redghostheadingfor == 180:
+        if redghostcurrrow == 17 and redghostcurrcol == 1:
+            redghost.goto(coordinates[17][26][0], coordinates[17][26][1])
+            return
+    if reddead != True:
+        if ghostchase == True:
+            targetsqaurerow = pacmancurrrow
+            targetsqaurecol = pacmancurrcol
+            if redghostcurrrow + 1 == pacmancurrrow and redghostcurrcol == pacmancurrcol or redghostcurrrow - 1 == pacmancurrrow and redghostcurrcol == pacmancurrcol or redghostcurrrow == pacmancurrrow and redghostcurrcol + 1 == pacmancurrcol or redghostcurrrow == pacmancurrrow and redghostcurrcol - 1 == pacmancurrcol:
+                redghost.goto(coordinates[pacmancurrrow][pacmancurrcol][0],
+                              coordinates[pacmancurrrow][pacmancurrcol][1])
+            else:
+                moverow, movecol = findpath(redghostcurrrow, redghostcurrcol, targetsqaurerow, targetsqaurecol)
+                redghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostscatter == True:
+            if redghostcurrrow == 4 and redghostcurrcol == 23:
+                redghost.goto(coordinates[4][24][0], coordinates[4][24][1])
+            elif redghostcurrrow == 4 and redghostcurrcol == 24:
+                redghost.goto(coordinates[4][25][0], coordinates[4][25][1])
+            elif redghostcurrrow == 4 and redghostcurrcol == 25:
+                redghost.goto(coordinates[4][26][0], coordinates[4][26][1])
+            elif redghostcurrrow == 4 and redghostcurrcol == 26:
+                redghost.goto(coordinates[5][26][0], coordinates[5][26][1])
+            elif redghostcurrrow == 5 and redghostcurrcol == 26:
+                redghost.goto(coordinates[6][26][0], coordinates[6][26][1])
+            elif redghostcurrrow == 6 and redghostcurrcol == 26:
+                redghost.goto(coordinates[7][26][0], coordinates[7][26][1])
+            elif redghostcurrrow == 7 and redghostcurrcol == 26:
+                redghost.goto(coordinates[8][26][0], coordinates[8][26][1])
+            elif redghostcurrrow == 8 and redghostcurrcol == 26:
+                redghost.goto(coordinates[8][25][0], coordinates[8][25][1])
+            elif redghostcurrrow == 8 and redghostcurrcol == 25:
+                redghost.goto(coordinates[8][24][0], coordinates[8][24][1])
+            elif redghostcurrrow == 8 and redghostcurrcol == 24:
+                redghost.goto(coordinates[8][23][0], coordinates[8][23][1])
+            else:
+                targetsqaurerow = 4
+                targetsqaurecol = 24
+                moverow, movecol = findpath(redghostcurrrow, redghostcurrcol, targetsqaurerow, targetsqaurecol)
+                redghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostrunawayiepacmankill == True:
+            redghostheadingfor = redghost.heading()
+            if redghostheadingfor == 0:
+                x = coordinates[redghostcurrrow][redghostcurrcol][0]
+                if map[redghostcurrrow - 1][redghostcurrcol] == '0' and int(redghost.xcor()) == x:
+                    redghost.goto(redghostxcord, redghostycord + 12)
+                    redghostheadingfor = 90
+                    redghost.setheading(redghostheadingfor)
+                elif map[redghostcurrrow + 1][redghostcurrcol] == '0' and int(redghost.xcor()) == x:
+                    redghost.goto(redghostxcord - 12, redghostycord)
+                    redghostheadingfor = 270
+                    redghost.setheading(redghostheadingfor)
+                else:
+                    x = coordinates[redghostcurrrow][redghostcurrcol + 1][0]
+                    if map[redghostcurrrow][redghostcurrcol + 1] == '1':
+                        if int(redghost.xcor() + 24) == x:
+                            redghost.goto(coordinates[redghostcurrrow][redghostcurrcol][0],
+                                          coordinates[redghostcurrrow][redghostcurrcol][1])
+                        else:
+                            redghost.goto(redghostxcord + 12, redghostycord)
+                    else:
+                        redghost.goto(redghostxcord + 12, redghostycord)
+            if redghostheadingfor == 90:
+                y = coordinates[redghostcurrrow][redghostcurrcol][1]
+                if map[redghostcurrrow][redghostcurrcol + 1] == '0' and int(redghost.ycor()) == y:
+                    redghost.goto(redghostxcord + 12, redghostycord)
+                    redghostheadingfor = 0
+                    redghost.setheading(redghostheadingfor)
+                elif map[redghostcurrrow][redghostcurrcol - 1] == '0' and int(redghost.ycor()) == y:
+                    redghost.goto(redghostxcord - 12, redghostycord)
+                    redghostheadingfor = 180
+                    redghost.setheading(redghostheadingfor)
+                else:
+                    y = coordinates[redghostcurrrow - 1][redghostcurrcol][1]
+                    if map[redghostcurrrow - 1][redghostcurrcol] == '1':
+                        if int(redghost.ycor() + 24) == y:
+                            redghost.goto(coordinates[redghostcurrrow][redghostcurrcol][0],
+                                          coordinates[redghostcurrrow][redghostcurrcol][1])
+                        else:
+                            redghost.goto(redghostxcord, redghostycord + 12)
+                    else:
+                        redghost.goto(redghostxcord, redghostycord + 12)
+            if redghostheadingfor == 180:
+                x = coordinates[redghostcurrrow][redghostcurrcol][0]
+                if map[redghostcurrrow - 1][redghostcurrcol] == '0' and int(redghost.xcor()) == x:
+                    redghost.goto(redghostxcord, redghostycord + 12)
+                    redghostheadingfor = 90
+                    redghost.setheading(redghostheadingfor)
+                elif map[redghostcurrrow + 1][redghostcurrcol] == '0' and int(redghost.xcor()) == x:
+                    redghost.goto(redghostxcord - 12, redghostycord)
+                    redghostheadingfor = 270
+                    redghost.setheading(redghostheadingfor)
+                else:
+                    x = coordinates[redghostcurrrow][redghostcurrcol - 1][0]
+                    if map[redghostcurrrow][redghostcurrcol - 1] == '1':
+                        if int(redghost.xcor() - 24) == x:
+                            redghost.goto(coordinates[redghostcurrrow][redghostcurrcol][0],
+                                          coordinates[redghostcurrrow][redghostcurrcol][1])
+                        else:
+                            redghost.goto(redghostxcord - 12, redghostycord)
+                    else:
+                        redghost.goto(redghostxcord - 12, redghostycord)
+            if redghostheadingfor == 270:
+                y = coordinates[redghostcurrrow][redghostcurrcol][1]
+                if map[redghostcurrrow][redghostcurrcol + 1] == '0' and int(redghost.ycor()) == y:
+                    redghost.goto(redghostxcord + 12, redghostycord)
+                    redghostheadingfor = 0
+                    redghost.setheading(redghostheadingfor)
+                elif map[redghostcurrrow][redghostcurrcol - 1] == '0' and int(redghost.ycor()) == y:
+                    redghost.goto(redghostxcord - 12, redghostycord)
+                    redghostheadingfor = 180
+                    redghost.setheading(redghostheadingfor)
+                else:
+                    y = coordinates[redghostcurrrow + 1][redghostcurrcol][1]
+                    if map[redghostcurrrow + 1][redghostcurrcol] == '1':
+                        if int(redghost.ycor() - 24) == y:
+                            redghost.goto(coordinates[redghostcurrrow][redghostcurrcol][0],
+                                          coordinates[redghostcurrrow][redghostcurrcol][1])
+                        else:
+                            redghost.goto(redghostxcord, redghostycord - 12)
+                    else:
+                        redghost.goto(redghostxcord, redghostycord - 12)
+    return
+
+
+def movePinkGhost():
+    global pacmancurrrow, pacmancurrrow, pacmenheading, ghostchase, ghostscatter, ghostrunawayiepacmankill, pinkdead
+    targetgood = False
+    pinkghostxcord = int(pinkghost.xcor())
+    pinkghostycord = int(pinkghost.ycor())
+    row, col = whichSquare(pinkghostxcord, pinkghostycord)
+    pinkghostcurrrow = row
+    pinkghostcurrcol = col
+    pinkghostheadingfor = pinkghost.heading()
+    if pinkghostheadingfor == 0:
+        if pinkghostcurrrow == 17 and pinkghostcurrcol == 26:
+            pinkghost.goto(coordinates[17][1][0], coordinates[17][1][1])
+            return
+    if pinkghostheadingfor == 180:
+        if pinkghostcurrrow == 17 and pinkghostcurrcol == 1:
+            pinkghost.goto(coordinates[17][26][0], coordinates[17][26][1])
+            return
+    if pinkdead != True:
+        if ghostchase == True:
+            if pacmenheading == 0:
+                if pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol - 1 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol - 2 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol - 3 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol - 4 == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol + 4
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurecol -= 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurecol -= 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(pinkghostcurrrow, pinkghostcurrcol, targetsqaurerow, targetsqaurecol)
+                pinkghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 90:
+                if pinkghostcurrrow + 1 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow + 2 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow + 3 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow + 4 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow - 4
+                    targetsqaurecol = pacmancurrcol
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurerow += 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurerow += 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(pinkghostcurrrow, pinkghostcurrcol, targetsqaurerow, targetsqaurecol)
+                pinkghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 180:
+                if pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol + 1 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol + 2 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol + 3 == pacmancurrcol or pinkghostcurrrow == pacmancurrrow and pinkghostcurrcol + 4 == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol - 4
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurecol += 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurecol += 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(pinkghostcurrrow, pinkghostcurrcol, targetsqaurerow, targetsqaurecol)
+                pinkghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 270:
+                if pinkghostcurrrow - 1 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow - 2 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow - 3 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol or pinkghostcurrrow - 4 == pacmancurrrow and pinkghostcurrcol == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow + 4
+                    targetsqaurecol = pacmancurrcol
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurerow -= 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurerow -= 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(pinkghostcurrrow, pinkghostcurrcol, targetsqaurerow, targetsqaurecol)
+                pinkghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostscatter == True:
+            if pinkghostcurrrow == 4 and pinkghostcurrcol == 4:
+                pinkghost.goto(coordinates[4][3][0], coordinates[4][3][1])
+            elif pinkghostcurrrow == 4 and pinkghostcurrcol == 3:
+                pinkghost.goto(coordinates[4][2][0], coordinates[4][2][1])
+            elif pinkghostcurrrow == 4 and pinkghostcurrcol == 2:
+                pinkghost.goto(coordinates[4][1][0], coordinates[4][1][1])
+            elif pinkghostcurrrow == 4 and pinkghostcurrcol == 1:
+                pinkghost.goto(coordinates[5][1][0], coordinates[5][1][1])
+            elif pinkghostcurrrow == 5 and pinkghostcurrcol == 1:
+                pinkghost.goto(coordinates[6][1][0], coordinates[6][1][1])
+            elif pinkghostcurrrow == 6 and pinkghostcurrcol == 1:
+                pinkghost.goto(coordinates[7][1][0], coordinates[7][1][1])
+            elif pinkghostcurrrow == 7 and pinkghostcurrcol == 1:
+                pinkghost.goto(coordinates[8][1][0], coordinates[8][1][1])
+            elif pinkghostcurrrow == 8 and pinkghostcurrcol == 1:
+                pinkghost.goto(coordinates[8][2][0], coordinates[8][2][1])
+            elif pinkghostcurrrow == 8 and pinkghostcurrcol == 2:
+                pinkghost.goto(coordinates[8][3][0], coordinates[8][3][1])
+            elif pinkghostcurrrow == 8 and pinkghostcurrcol == 3:
+                pinkghost.goto(coordinates[8][4][0], coordinates[8][4][1])
+            elif pinkghostcurrrow == 8 and pinkghostcurrcol == 4:
+                pinkghost.goto(coordinates[8][5][0], coordinates[8][5][1])
+            else:
+                targetsqaurerow = 4
+                targetsqaurecol = 3
+                moverow, movecol = findpath(pinkghostcurrrow, pinkghostcurrcol, targetsqaurerow, targetsqaurecol)
+                pinkghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostrunawayiepacmankill == True:
+            pinkghostheadingfor = pinkghost.heading()
+            if pinkghostheadingfor == 0:
+                x = coordinates[pinkghostcurrrow][pinkghostcurrcol][0]
+                if map[pinkghostcurrrow - 1][pinkghostcurrcol] == '0' and int(pinkghost.xcor()) == x:
+                    pinkghost.goto(pinkghostxcord, pinkghostycord + 12)
+                    pinkghostheadingfor = 90
+                    pinkghost.setheading(pinkghostheadingfor)
+                elif map[pinkghostcurrrow + 1][pinkghostcurrcol] == '0' and int(pinkghost.xcor()) == x:
+                    pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+                    pinkghostheadingfor = 270
+                    pinkghost.setheading(pinkghostheadingfor)
+                else:
+                    x = coordinates[pinkghostcurrrow][pinkghostcurrcol + 1][0]
+                    if map[pinkghostcurrrow][pinkghostcurrcol + 1] == '1':
+                        if int(pinkghost.xcor() + 24) == x:
+                            pinkghost.goto(coordinates[pinkghostcurrrow][pinkghostcurrcol][0],
+                                           coordinates[pinkghostcurrrow][pinkghostcurrcol][1])
+                        else:
+                            pinkghost.goto(pinkghostxcord + 12, pinkghostycord)
+                    else:
+                        pinkghost.goto(pinkghostxcord + 12, pinkghostycord)
+            if pinkghostheadingfor == 90:
+                y = coordinates[pinkghostcurrrow][pinkghostcurrcol][1]
+                if map[pinkghostcurrrow][pinkghostcurrcol + 1] == '0' and int(pinkghost.ycor()) == y:
+                    pinkghost.goto(pinkghostxcord + 12, pinkghostycord)
+                    pinkghostheadingfor = 0
+                    pinkghost.setheading(pinkghostheadingfor)
+                elif map[pinkghostcurrrow][pinkghostcurrcol - 1] == '0' and int(pinkghost.ycor()) == y:
+                    pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+                    pinkghostheadingfor = 180
+                    pinkghost.setheading(pinkghostheadingfor)
+                else:
+                    y = coordinates[pinkghostcurrrow - 1][pinkghostcurrcol][1]
+                    if map[pinkghostcurrrow - 1][pinkghostcurrcol] == '1':
+                        if int(pinkghost.ycor() + 24) == y:
+                            pinkghost.goto(coordinates[pinkghostcurrrow][pinkghostcurrcol][0],
+                                           coordinates[pinkghostcurrrow][pinkghostcurrcol][1])
+                        else:
+                            pinkghost.goto(pinkghostxcord, pinkghostycord + 12)
+                    else:
+                        pinkghost.goto(pinkghostxcord, pinkghostycord + 12)
+            if pinkghostheadingfor == 180:
+                x = coordinates[pinkghostcurrrow][pinkghostcurrcol][0]
+                if map[pinkghostcurrrow - 1][pinkghostcurrcol] == '0' and int(pinkghost.xcor()) == x:
+                    pinkghost.goto(pinkghostxcord, pinkghostycord + 12)
+                    pinkghostheadingfor = 90
+                    pinkghost.setheading(pinkghostheadingfor)
+                elif map[pinkghostcurrrow + 1][pinkghostcurrcol] == '0' and int(pinkghost.xcor()) == x:
+                    pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+                    pinkghostheadingfor = 270
+                    pinkghost.setheading(pinkghostheadingfor)
+                else:
+                    x = coordinates[pinkghostcurrrow][pinkghostcurrcol - 1][0]
+                    if map[pinkghostcurrrow][pinkghostcurrcol - 1] == '1':
+                        if int(pinkghost.xcor() - 24) == x:
+                            pinkghost.goto(coordinates[pinkghostcurrrow][pinkghostcurrcol][0],
+                                           coordinates[pinkghostcurrrow][pinkghostcurrcol][1])
+                        else:
+                            pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+                    else:
+                        pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+            if pinkghostheadingfor == 270:
+                y = coordinates[pinkghostcurrrow][pinkghostcurrcol][1]
+                if map[pinkghostcurrrow][pinkghostcurrcol + 1] == '0' and int(pinkghost.ycor()) == y:
+                    pinkghost.goto(pinkghostxcord + 12, pinkghostycord)
+                    pinkghostheadingfor = 0
+                    pinkghost.setheading(pinkghostheadingfor)
+                elif map[pinkghostcurrrow][pinkghostcurrcol - 1] == '0' and int(pinkghost.ycor()) == y:
+                    pinkghost.goto(pinkghostxcord - 12, pinkghostycord)
+                    pinkghostheadingfor = 180
+                    pinkghost.setheading(pinkghostheadingfor)
+                else:
+                    y = coordinates[pinkghostcurrrow + 1][pinkghostcurrcol][1]
+                    if map[pinkghostcurrrow + 1][pinkghostcurrcol] == '1':
+                        if int(pinkghost.ycor() - 24) == y:
+                            pinkghost.goto(coordinates[pinkghostcurrrow][pinkghostcurrcol][0],
+                                           coordinates[pinkghostcurrrow][pinkghostcurrcol][1])
+                        else:
+                            pinkghost.goto(pinkghostxcord, pinkghostycord - 12)
+                    else:
+                        pinkghost.goto(pinkghostxcord, pinkghostycord - 12)
+    return
+
+
+def moveBlueGhost():
+    global pacmancurrrow, pacmancurrrow, pacmenheading, ghostchase, ghostscatter, ghostrunawayiepacmankill, bluedead
+    targetgood = False
+    blueghostxcord = int(blueghost.xcor())
+    blueghostycord = int(blueghost.ycor())
+    row, col = whichSquare(blueghostxcord, blueghostycord)
+    blueghostcurrrow = row
+    blueghostcurrcol = col
+    blueghostheadingfor = blueghost.heading()
+    if blueghostheadingfor == 0:
+        if blueghostcurrrow == 17 and blueghostcurrcol == 26:
+            blueghost.goto(coordinates[17][1][0], coordinates[17][1][1])
+            return
+    if blueghostheadingfor == 180:
+        if blueghostcurrrow == 17 and blueghostcurrcol == 1:
+            blueghost.goto(coordinates[17][26][0], coordinates[17][26][1])
+            return
+    if bluedead != True:
+        if ghostchase == True:
+            if pacmenheading == 0:
+                if blueghostcurrrow == pacmancurrrow and blueghostcurrcol + 1 == pacmancurrcol or blueghostcurrrow == pacmancurrrow and blueghostcurrcol + 2 == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol - 2
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurecol += 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurecol += 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(blueghostcurrrow, blueghostcurrcol, targetsqaurerow, targetsqaurecol)
+                blueghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 90:
+                if blueghostcurrrow - 1 == pacmancurrrow and blueghostcurrcol == pacmancurrcol or blueghostcurrrow - 2 == pacmancurrrow and blueghostcurrcol == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow + 2
+                    targetsqaurecol = pacmancurrcol
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurerow -= 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurerow -= 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(blueghostcurrrow, blueghostcurrcol, targetsqaurerow, targetsqaurecol)
+                blueghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 180:
+                if blueghostcurrrow == pacmancurrrow and blueghostcurrcol - 1 == pacmancurrcol or blueghostcurrrow == pacmancurrrow and blueghostcurrcol - 2 == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol + 2
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurecol -= 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurecol -= 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(blueghostcurrrow, blueghostcurrcol, targetsqaurerow, targetsqaurecol)
+                blueghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+            if pacmenheading == 270:
+                if blueghostcurrrow + 1 == pacmancurrrow and blueghostcurrcol == pacmancurrcol or blueghostcurrrow + 2 == pacmancurrrow and blueghostcurrcol == pacmancurrcol:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+                else:
+                    targetsqaurerow = pacmancurrrow - 2
+                    targetsqaurecol = pacmancurrcol
+                while targetgood == False:
+                    if targetsqaurerow > 33 or targetsqaurerow < 3 or targetsqaurecol > 27 or targetsqaurecol < 0:
+                        targetsqaurerow += 1
+                    else:
+                        if map[targetsqaurerow][targetsqaurecol] == '1' or map[targetsqaurerow][
+                            targetsqaurecol] == '2' or \
+                                map[targetsqaurerow][targetsqaurecol] == '3':
+                            targetsqaurerow += 1
+                        else:
+                            targetgood = True
+                moverow, movecol = findpath(blueghostcurrrow, blueghostcurrcol, targetsqaurerow, targetsqaurecol)
+                blueghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostscatter == True:
+            if blueghostcurrrow == 26 and blueghostcurrcol == 19:
+                blueghost.goto(coordinates[26][20][0], coordinates[26][20][1])
+            elif blueghostcurrrow == 26 and blueghostcurrcol == 20:
+                blueghost.goto(coordinates[26][21][0], coordinates[26][21][1])
+            elif blueghostcurrrow == 26 and blueghostcurrcol == 21:
+                blueghost.goto(coordinates[27][21][0], coordinates[27][21][1])
+            elif blueghostcurrrow == 27 and blueghostcurrcol == 21:
+                blueghost.goto(coordinates[28][21][0], coordinates[28][21][1])
+            elif blueghostcurrrow == 28 and blueghostcurrcol == 21:
+                blueghost.goto(coordinates[29][21][0], coordinates[29][21][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 21:
+                blueghost.goto(coordinates[29][22][0], coordinates[29][22][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 22:
+                blueghost.goto(coordinates[29][23][0], coordinates[29][23][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 23:
+                blueghost.goto(coordinates[29][24][0], coordinates[29][24][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 24:
+                blueghost.goto(coordinates[29][25][0], coordinates[29][25][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 25:
+                blueghost.goto(coordinates[29][26][0], coordinates[29][26][1])
+            elif blueghostcurrrow == 29 and blueghostcurrcol == 26:
+                blueghost.goto(coordinates[30][26][0], coordinates[30][26][1])
+            elif blueghostcurrrow == 30 and blueghostcurrcol == 26:
+                blueghost.goto(coordinates[31][26][0], coordinates[31][26][1])
+            elif blueghostcurrrow == 31 and blueghostcurrcol == 26:
+                blueghost.goto(coordinates[32][26][0], coordinates[32][26][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 26:
+                blueghost.goto(coordinates[32][25][0], coordinates[32][25][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 25:
+                blueghost.goto(coordinates[32][24][0], coordinates[32][24][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 24:
+                blueghost.goto(coordinates[32][23][0], coordinates[32][23][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 23:
+                blueghost.goto(coordinates[32][22][0], coordinates[32][22][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 22:
+                blueghost.goto(coordinates[32][21][0], coordinates[32][21][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 21:
+                blueghost.goto(coordinates[32][20][0], coordinates[32][20][1])
+            elif blueghostcurrrow == 32 and blueghostcurrcol == 20:
+                blueghost.goto(coordinates[32][19][0], coordinates[32][19][1])
+            else:
+                targetsqaurerow = 26
+                targetsqaurecol = 20
+                moverow, movecol = findpath(blueghostcurrrow, blueghostcurrcol, targetsqaurerow, targetsqaurecol)
+                blueghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostrunawayiepacmankill == True:
+            blueghostheadingfor = blueghost.heading()
+            if blueghostheadingfor == 0:
+                x = coordinates[blueghostcurrrow][blueghostcurrcol][0]
+                if map[blueghostcurrrow - 1][blueghostcurrcol] == '0' and int(blueghost.xcor()) == x:
+                    blueghost.goto(blueghostxcord, blueghostycord + 12)
+                    blueghostheadingfor = 90
+                    blueghost.setheading(blueghostheadingfor)
+                elif map[blueghostcurrrow + 1][blueghostcurrcol] == '0' and int(blueghost.xcor()) == x:
+                    blueghost.goto(blueghostxcord - 12, blueghostycord)
+                    blueghostheadingfor = 270
+                    blueghost.setheading(blueghostheadingfor)
+                else:
+                    x = coordinates[blueghostcurrrow][blueghostcurrcol + 1][0]
+                    if map[blueghostcurrrow][blueghostcurrcol + 1] == '1':
+                        if int(blueghost.xcor() + 24) == x:
+                            blueghost.goto(coordinates[blueghostcurrrow][blueghostcurrcol][0],
+                                           coordinates[blueghostcurrrow][blueghostcurrcol][1])
+                        else:
+                            blueghost.goto(blueghostxcord + 12, blueghostycord)
+                    else:
+                        blueghost.goto(blueghostxcord + 12, blueghostycord)
+            if blueghostheadingfor == 90:
+                y = coordinates[blueghostcurrrow][blueghostcurrcol][1]
+                if map[blueghostcurrrow][blueghostcurrcol + 1] == '0' and int(blueghost.ycor()) == y:
+                    blueghost.goto(blueghostxcord + 12, blueghostycord)
+                    blueghostheadingfor = 0
+                    blueghost.setheading(blueghostheadingfor)
+                elif map[blueghostcurrrow][blueghostcurrcol - 1] == '0' and int(blueghost.ycor()) == y:
+                    blueghost.goto(blueghostxcord - 12, blueghostycord)
+                    blueghostheadingfor = 180
+                    blueghost.setheading(blueghostheadingfor)
+                else:
+                    y = coordinates[blueghostcurrrow - 1][blueghostcurrcol][1]
+                    if map[blueghostcurrrow - 1][blueghostcurrcol] == '1':
+                        if int(blueghost.ycor() + 24) == y:
+                            blueghost.goto(coordinates[blueghostcurrrow][blueghostcurrcol][0],
+                                           coordinates[blueghostcurrrow][blueghostcurrcol][1])
+                        else:
+                            blueghost.goto(blueghostxcord, blueghostycord + 12)
+                    else:
+                        blueghost.goto(blueghostxcord, blueghostycord + 12)
+            if blueghostheadingfor == 180:
+                x = coordinates[blueghostcurrrow][blueghostcurrcol][0]
+                if map[blueghostcurrrow - 1][blueghostcurrcol] == '0' and int(blueghost.xcor()) == x:
+                    blueghost.goto(blueghostxcord, blueghostycord + 12)
+                    blueghostheadingfor = 90
+                    blueghost.setheading(blueghostheadingfor)
+                elif map[blueghostcurrrow + 1][blueghostcurrcol] == '0' and int(blueghost.xcor()) == x:
+                    blueghost.goto(blueghostxcord - 12, blueghostycord)
+                    blueghostheadingfor = 270
+                    blueghost.setheading(blueghostheadingfor)
+                else:
+                    x = coordinates[blueghostcurrrow][blueghostcurrcol - 1][0]
+                    if map[blueghostcurrrow][blueghostcurrcol - 1] == '1':
+                        if int(blueghost.xcor() - 24) == x:
+                            blueghost.goto(coordinates[blueghostcurrrow][blueghostcurrcol][0],
+                                           coordinates[blueghostcurrrow][blueghostcurrcol][1])
+                        else:
+                            blueghost.goto(blueghostxcord - 12, blueghostycord)
+                    else:
+                        blueghost.goto(blueghostxcord - 12, blueghostycord)
+            if blueghostheadingfor == 270:
+                y = coordinates[blueghostcurrrow][blueghostcurrcol][1]
+                if map[blueghostcurrrow][blueghostcurrcol + 1] == '0' and int(blueghost.ycor()) == y:
+                    blueghost.goto(blueghostxcord + 12, blueghostycord)
+                    blueghostheadingfor = 0
+                    blueghost.setheading(blueghostheadingfor)
+                elif map[blueghostcurrrow][blueghostcurrcol - 1] == '0' and int(blueghost.ycor()) == y:
+                    blueghost.goto(blueghostxcord - 12, blueghostycord)
+                    blueghostheadingfor = 180
+                    blueghost.setheading(blueghostheadingfor)
+                else:
+                    y = coordinates[blueghostcurrrow + 1][blueghostcurrcol][1]
+                    if map[blueghostcurrrow + 1][blueghostcurrcol] == '1':
+                        if int(blueghost.ycor() - 24) == y:
+                            blueghost.goto(coordinates[blueghostcurrrow][blueghostcurrcol][0],
+                                           coordinates[blueghostcurrrow][blueghostcurrcol][1])
+                        else:
+                            blueghost.goto(blueghostxcord, blueghostycord - 12)
+                    else:
+                        blueghost.goto(blueghostxcord, blueghostycord - 12)
+    return
+
+
+def moveOrangeGhost():
+    global pacmancurrrow, pacmancurrrow, ghostchase, ghostscatter, ghostrunawayiepacmankill, orangedead
+    random1 = 0
+    orangeghostxcord = int(orangeghost.xcor())
+    orangeghostycord = int(orangeghost.ycor())
+    row, col = whichSquare(orangeghostxcord, orangeghostycord)
+    orangeghostcurrrow = row
+    orangeghostcurrcol = col
+    orangeghostheadingfor = orangeghost.heading()
+    if orangeghostheadingfor == 0:
+        if orangeghostcurrrow == 17 and orangeghostcurrcol == 26:
+            orangeghost.goto(coordinates[17][1][0], coordinates[17][1][1])
+            return
+    if orangeghostheadingfor == 180:
+        if orangeghostcurrrow == 17 and orangeghostcurrcol == 1:
+            orangeghost.goto(coordinates[17][26][0], coordinates[17][26][1])
+            return
+    x1bruh = int(pacman.xcor()) + 240
+    x2bruh = int(pacman.xcor()) - 240
+    y1bruh = int(pacman.ycor()) + 240
+    y2bruh = int(pacman.ycor()) - 240
+    if orangedead != True:
+        if ghostchase == True:
+            if x2bruh <= orangeghostxcord <= x1bruh and y2bruh <= orangeghostycord <= y1bruh:
+                random1 = random.randint(1, 100)
+                if random1 > 70:
+                    targetsqaurerow = 26
+                    targetsqaurecol = 7
+                else:
+                    targetsqaurerow = pacmancurrrow
+                    targetsqaurecol = pacmancurrcol
+            else:
+                targetsqaurerow = pacmancurrrow
+                targetsqaurecol = pacmancurrcol
+            if orangeghostcurrrow + 1 == pacmancurrrow and orangeghostcurrcol == pacmancurrcol or orangeghostcurrrow - 1 == pacmancurrrow and orangeghostcurrcol == pacmancurrcol or orangeghostcurrrow == pacmancurrrow and orangeghostcurrcol + 1 == pacmancurrcol or orangeghostcurrrow == pacmancurrrow and orangeghostcurrcol - 1 == pacmancurrcol:
+                orangeghost.goto(coordinates[pacmancurrrow][pacmancurrcol][0],
+                                 coordinates[pacmancurrrow][pacmancurrcol][1])
+            else:
+                moverow, movecol = findpath(orangeghostcurrrow, orangeghostcurrcol, targetsqaurerow, targetsqaurecol)
+                orangeghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostscatter == True:
+            if orangeghostcurrrow == 26 and orangeghostcurrcol == 8:
+                orangeghost.goto(coordinates[26][7][0], coordinates[26][7][1])
+            elif orangeghostcurrrow == 26 and orangeghostcurrcol == 7:
+                orangeghost.goto(coordinates[26][6][0], coordinates[26][6][1])
+            elif orangeghostcurrrow == 26 and orangeghostcurrcol == 6:
+                orangeghost.goto(coordinates[27][6][0], coordinates[27][6][1])
+            elif orangeghostcurrrow == 27 and orangeghostcurrcol == 6:
+                orangeghost.goto(coordinates[28][6][0], coordinates[28][6][1])
+            elif orangeghostcurrrow == 28 and orangeghostcurrcol == 6:
+                orangeghost.goto(coordinates[29][6][0], coordinates[29][6][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 6:
+                orangeghost.goto(coordinates[29][5][0], coordinates[29][5][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 5:
+                orangeghost.goto(coordinates[29][4][0], coordinates[29][4][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 4:
+                orangeghost.goto(coordinates[29][3][0], coordinates[29][3][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 3:
+                orangeghost.goto(coordinates[29][2][0], coordinates[29][2][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 2:
+                orangeghost.goto(coordinates[29][1][0], coordinates[29][1][1])
+            elif orangeghostcurrrow == 29 and orangeghostcurrcol == 1:
+                orangeghost.goto(coordinates[30][1][0], coordinates[30][1][1])
+            elif orangeghostcurrrow == 30 and orangeghostcurrcol == 1:
+                orangeghost.goto(coordinates[31][1][0], coordinates[31][1][1])
+            elif orangeghostcurrrow == 31 and orangeghostcurrcol == 1:
+                orangeghost.goto(coordinates[32][1][0], coordinates[32][1][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 1:
+                orangeghost.goto(coordinates[32][2][0], coordinates[32][2][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 2:
+                orangeghost.goto(coordinates[32][3][0], coordinates[32][3][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 3:
+                orangeghost.goto(coordinates[32][4][0], coordinates[32][4][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 4:
+                orangeghost.goto(coordinates[32][5][0], coordinates[32][5][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 5:
+                orangeghost.goto(coordinates[32][6][0], coordinates[32][6][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 6:
+                orangeghost.goto(coordinates[32][7][0], coordinates[32][7][1])
+            elif orangeghostcurrrow == 32 and orangeghostcurrcol == 7:
+                orangeghost.goto(coordinates[32][8][0], coordinates[32][8][1])
+            else:
+                targetsqaurerow = 26
+                targetsqaurecol = 7
+                moverow, movecol = findpath(orangeghostcurrrow, orangeghostcurrcol, targetsqaurerow, targetsqaurecol)
+                orangeghost.goto(coordinates[moverow][movecol][0], coordinates[moverow][movecol][1])
+        if ghostrunawayiepacmankill == True:
+            orangeghostheadingfor = orangeghost.heading()
+            if orangeghostheadingfor == 0:
+                x = coordinates[orangeghostcurrrow][orangeghostcurrcol][0]
+                if map[orangeghostcurrrow - 1][orangeghostcurrcol] == '0' and int(orangeghost.xcor()) == x:
+                    orangeghost.goto(orangeghostxcord, orangeghostycord + 12)
+                    orangeghostheadingfor = 90
+                    orangeghost.setheading(orangeghostheadingfor)
+                elif map[orangeghostcurrrow + 1][orangeghostcurrcol] == '0' and int(orangeghost.xcor()) == x:
+                    orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+                    orangeghostheadingfor = 270
+                    orangeghost.setheading(orangeghostheadingfor)
+                else:
+                    x = coordinates[orangeghostcurrrow][orangeghostcurrcol + 1][0]
+                    if map[orangeghostcurrrow][orangeghostcurrcol + 1] == '1':
+                        if int(orangeghost.xcor() + 24) == x:
+                            orangeghost.goto(coordinates[orangeghostcurrrow][orangeghostcurrcol][0],
+                                             coordinates[orangeghostcurrrow][orangeghostcurrcol][1])
+                        else:
+                            orangeghost.goto(orangeghostxcord + 12, orangeghostycord)
+                    else:
+                        orangeghost.goto(orangeghostxcord + 12, orangeghostycord)
+            if orangeghostheadingfor == 90:
+                y = coordinates[orangeghostcurrrow][orangeghostcurrcol][1]
+                if map[orangeghostcurrrow][orangeghostcurrcol + 1] == '0' and int(orangeghost.ycor()) == y:
+                    orangeghost.goto(orangeghostxcord + 12, orangeghostycord)
+                    orangeghostheadingfor = 0
+                    orangeghost.setheading(orangeghostheadingfor)
+                elif map[orangeghostcurrrow][orangeghostcurrcol - 1] == '0' and int(orangeghost.ycor()) == y:
+                    orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+                    orangeghostheadingfor = 180
+                    orangeghost.setheading(orangeghostheadingfor)
+                else:
+                    y = coordinates[orangeghostcurrrow - 1][orangeghostcurrcol][1]
+                    if map[orangeghostcurrrow - 1][orangeghostcurrcol] == '1':
+                        if int(orangeghost.ycor() + 24) == y:
+                            orangeghost.goto(coordinates[orangeghostcurrrow][orangeghostcurrcol][0],
+                                             coordinates[orangeghostcurrrow][orangeghostcurrcol][1])
+                        else:
+                            orangeghost.goto(orangeghostxcord, orangeghostycord + 12)
+                    else:
+                        orangeghost.goto(orangeghostxcord, orangeghostycord + 12)
+            if orangeghostheadingfor == 180:
+                x = coordinates[orangeghostcurrrow][orangeghostcurrcol][0]
+                if map[orangeghostcurrrow - 1][orangeghostcurrcol] == '0' and int(orangeghost.xcor()) == x:
+                    orangeghost.goto(orangeghostxcord, orangeghostycord + 12)
+                    orangeghostheadingfor = 90
+                    orangeghost.setheading(orangeghostheadingfor)
+                elif map[orangeghostcurrrow + 1][orangeghostcurrcol] == '0' and int(orangeghost.xcor()) == x:
+                    orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+                    orangeghostheadingfor = 270
+                    orangeghost.setheading(orangeghostheadingfor)
+                else:
+                    x = coordinates[orangeghostcurrrow][orangeghostcurrcol - 1][0]
+                    if map[orangeghostcurrrow][orangeghostcurrcol - 1] == '1':
+                        if int(orangeghost.xcor() - 24) == x:
+                            orangeghost.goto(coordinates[orangeghostcurrrow][orangeghostcurrcol][0],
+                                             coordinates[orangeghostcurrrow][orangeghostcurrcol][1])
+                        else:
+                            orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+                    else:
+                        orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+            if orangeghostheadingfor == 270:
+                y = coordinates[orangeghostcurrrow][orangeghostcurrcol][1]
+                if map[orangeghostcurrrow][orangeghostcurrcol + 1] == '0' and int(orangeghost.ycor()) == y:
+                    orangeghost.goto(orangeghostxcord + 12, orangeghostycord)
+                    orangeghostheadingfor = 0
+                    orangeghost.setheading(orangeghostheadingfor)
+                elif map[orangeghostcurrrow][orangeghostcurrcol - 1] == '0' and int(orangeghost.ycor()) == y:
+                    orangeghost.goto(orangeghostxcord - 12, orangeghostycord)
+                    orangeghostheadingfor = 180
+                    orangeghost.setheading(orangeghostheadingfor)
+                else:
+                    y = coordinates[orangeghostcurrrow + 1][orangeghostcurrcol][1]
+                    if map[orangeghostcurrrow + 1][orangeghostcurrcol] == '1':
+                        if int(orangeghost.ycor() - 24) == y:
+                            orangeghost.goto(coordinates[orangeghostcurrrow][orangeghostcurrcol][0],
+                                             coordinates[orangeghostcurrrow][orangeghostcurrcol][1])
+                        else:
+                            orangeghost.goto(orangeghostxcord, orangeghostycord - 12)
+                    else:
+                        orangeghost.goto(orangeghostxcord, orangeghostycord - 12)
+    return
+
+
+def moveArrow():
+    global pacmenheading
+    arrow.showturtle()
+    if pacmenheading == 0:
+        x = pacman.xcor()
+        y = pacman.ycor()
+        arrow.setheading(0)
+        arrow.goto(x + 24, y)
+    if pacmenheading == 90:
+        x = pacman.xcor()
+        y = pacman.ycor()
+        arrow.setheading(90)
+        arrow.goto(x, y + 24)
+    if pacmenheading == 180:
+        x = pacman.xcor()
+        y = pacman.ycor()
+        arrow.setheading(180)
+        arrow.goto(x - 24, y)
+    if pacmenheading == 270:
+        x = pacman.xcor()
+        y = pacman.ycor()
+        arrow.setheading(270)
+        arrow.goto(x, y - 24)
+    return
+
+
+def topBarupdates():
+    global score, highscore, lives, ghostchase, ghostscatter, ghostrunawayiepacmankill, level
+    scoreturt.clear()
+    scoreturt.write('Score: ' + str(score), font=("Times New Roman", 20, "normal"))
+    highscoreturt.clear()
+    highscoreturt.write('Highscore: ' + str(highscore), font=("Times New Roman", 20, "normal"))
+    livesturt.clear()
+    livesturt.write('Lives: ' + str(lives), font=("Times New Roman", 20, "normal"))
+    levelturt.clear()
+    levelturt.write('Level: ' + str(level), font=("Times New Roman", 20, "normal"))
+    modeturt.clear()
+    if ghostchase == True:
+        modeturt.write('Mode: Ghost Chase', font=("Times New Roman", 20, "normal"))
+    if ghostscatter == True:
+        modeturt.write('Mode: Ghost Scatter', font=("Times New Roman", 20, "normal"))
+    if ghostrunawayiepacmankill == True:
+        modeturt.write('Mode: Ghost Runaway', font=("Times New Roman", 20, "normal"))
+    return
+
+
+def timerforghosts():
+    global ghostchase, ghostscatter, ghostrunawayiepacmankill, timeformodes, timer1, timer2, timer3, timer4, timer5, timer6, timer7, timer8, timer9, ghostchasetimelol, timeforghostchase
+    if level == 1:
+        if ghostrunawayiepacmankill == False:
+            if time.time() >= timeformodes + 7 and timer1 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer1 = False
+            if time.time() >= timeformodes + 27 and timer2 == True:
+                ghostchase = False
+                ghostscatter = True
+                ghostrunawayiepacmankill = False
+                timer2 = False
+            if time.time() >= timeformodes + 34 and timer3 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer3 = False
+            if time.time() >= timeformodes + 54 and timer4 == True:
+                ghostchase = False
+                ghostscatter = True
+                ghostrunawayiepacmankill = False
+                timer4 = False
+            if time.time() >= timeformodes + 61 and timer5 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer5 = False
+        else:
+            if ghostchasetimelol == True:
+                timeforghostchase = time.time() + 10
+            if time.time() >= timeforghostchase:
+                ghostrunawayiepacmankill = False
+                if time.time() <= timeformodes + 7:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 7 and time.time() <= timeformodes + 27:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 27 and time.time() <= timeformodes + 34:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 34 and time.time() <= timeformodes + 54:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 54 and time.time() <= timeformodes + 61:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 61:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+            ghostchasetimelol = False
+    if level == 2:
+        if ghostrunawayiepacmankill == False:
+            if time.time() >= timeformodes + 7 and timer6 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer6 = False
+            if time.time() >= timeformodes + 27 and timer7 == True:
+                ghostchase = False
+                ghostscatter = True
+                ghostrunawayiepacmankill = False
+                timer7 = False
+            if time.time() >= timeformodes + 34 and timer8 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer8 = False
+        else:
+            if ghostchasetimelol == True:
+                timeforghostchase = time.time() + 10
+            if time.time() >= timeforghostchase:
+                ghostrunawayiepacmankill = False
+                if time.time() <= timeformodes + 7:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 7 and time.time() <= timeformodes + 27:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 27 and time.time() <= timeformodes + 34:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 34:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+    if level == 3:
+        if ghostrunawayiepacmankill == False:
+            if time.time() >= timeformodes + 7 and timer9 == True:
+                ghostchase = True
+                ghostscatter = False
+                ghostrunawayiepacmankill = False
+                timer9 = False
+        else:
+            if ghostchasetimelol == True:
+                timeforghostchase = time.time() + 10
+            if time.time() >= timeforghostchase:
+                ghostrunawayiepacmankill = False
+                if time.time() <= timeformodes + 7:
+                    ghostchase = False
+                    ghostscatter = True
+                    ghostrunawayiepacmankill = False
+                if time.time() >= timeformodes + 7:
+                    ghostchase = True
+                    ghostscatter = False
+                    ghostrunawayiepacmankill = False
+    return
+
+
+def findpath(currrow, currcol, targetrow, targetcol):
+    checking = []
+    gotthere = []
+    alreadychecked = []
+    checking.append([currrow, currcol])
+    gotthere.append(['start'])
+    alreadychecked.append([currrow, currcol])
+    checkingstill = True
+    finalsteps = True
+    newrow = 0
+    newcol = 0
+    while checkingstill == True:
+        for i in range(len(checking)):
+            if checking[i][0] == targetrow and checking[i][1] == targetcol:
+                if gotthere[i][0] == 'start':
+                    newrow = targetrow
+                    newcol = targetcol
+                else:
+                    newrow = gotthere[i][0]
+                    newcol = gotthere[i][1]
+                checkingstill = False
+        for i in range(len(checking)):
+            currrow2 = checking[i][0]
+            currcol2 = checking[i][1]
+            # ----------------------------
+            newrowup = currrow2 - 1
+            newcolup = currcol2
+            upgood = True
+            # ----------------------------
+            newrowdown = currrow2 + 1
+            newcoldown = currcol2
+            downgood = True
+            # ----------------------------
+            newrowleft = currrow2
+            newcolleft = currcol2 - 1
+            leftgood = True
+            # ----------------------------
+            newrowright = currrow2
+            newcolright = currcol2 + 1
+            rightgood = True
+            # ----------------------------
+            if newrowup > -1 and newrowup < 36 and newcolup > -1 and newcolup < 28:
+                if map[newrowup][newcolup] == '0':
+                    for i in range(len(alreadychecked)):
+                        if alreadychecked[i][0] == newrowup and alreadychecked[i][1] == newcolup:
+                            upgood = False
+                    if upgood == True:
+                        checking.append([newrowup, newcolup])
+                        gotthere.append([currrow2, currcol2])
+                        alreadychecked.append([newrowup, newcolup])
+            if newrowdown > -1 and newrowdown < 36 and newcoldown > -1 and newcoldown < 28:
+                if map[newrowdown][newcoldown] == '0':
+                    for i in range(len(alreadychecked)):
+                        if alreadychecked[i][0] == newrowdown and alreadychecked[i][1] == newcoldown:
+                            downgood = False
+                    if downgood == True:
+                        checking.append([newrowdown, newcoldown])
+                        gotthere.append([currrow2, currcol2])
+                        alreadychecked.append([newrowdown, newcoldown])
+            if newrowleft > -1 and newrowleft < 36 and newcolleft > -1 and newcolleft < 28:
+                if map[newrowleft][newcolleft] == '0':
+                    for i in range(len(alreadychecked)):
+                        if alreadychecked[i][0] == newrowleft and alreadychecked[i][1] == newcolleft:
+                            leftgood = False
+                    if leftgood == True:
+                        checking.append([newrowleft, newcolleft])
+                        gotthere.append([currrow2, currcol2])
+                        alreadychecked.append([newrowleft, newcolleft])
+            if newrowright > -1 and newrowright < 36 and newcolright > -1 and newcolright < 28:
+                if map[newrowright][newcolright] == '0':
+                    for i in range(len(alreadychecked)):
+                        if alreadychecked[i][0] == newrowright and alreadychecked[i][1] == newcolright:
+                            rightgood = False
+                    if rightgood == True:
+                        checking.append([newrowright, newcolright])
+                        gotthere.append([currrow2, currcol2])
+                        alreadychecked.append([newrowright, newcolright])
+    while finalsteps == True:
+        for i in range(len(checking)):
+            if checking[i][0] == newrow and checking[i][1] == newcol:
+                if gotthere[i][0] == 'start':
+                    newrow = targetrow
+                    newcol = targetcol
+                else:
+                    newrow = gotthere[i][0]
+                    newcol = gotthere[i][1]
+                if newrow == currrow + 1 and newcol == currcol:
+                    finalsteps = False
+                if newrow == currrow - 1 and newcol == currcol:
+                    finalsteps = False
+                if newrow == currrow and newcol + 1 == currcol:
+                    finalsteps = False
+                if newrow == currrow and newcol - 1 == currcol:
+                    finalsteps = False
+    return newrow, newcol
+
+
+def pacmandead():
+    global lives, ghostrunawayiepacmankill
+    if ghostrunawayiepacmankill != True:
+        deadcounter = 0
+        pacxcord = int(pacman.xcor())
+        pacycord = int(pacman.ycor())
+        row, col = whichSquare(pacxcord, pacycord)
+        pacmancurrrowd = row
+        pacmancurrcold = col
+        redghostxcord = int(redghost.xcor())
+        redghostycord = int(redghost.ycor())
+        row, col = whichSquare(redghostxcord, redghostycord)
+        redghostcurrrow = row
+        redghostcurrcol = col
+        pinkghostxcord = int(pinkghost.xcor())
+        pinkghostycord = int(pinkghost.ycor())
+        row, col = whichSquare(pinkghostxcord, pinkghostycord)
+        pinkghostcurrrow = row
+        pinkghostcurrcol = col
+        blueghostxcord = int(blueghost.xcor())
+        blueghostycord = int(blueghost.ycor())
+        row, col = whichSquare(blueghostxcord, blueghostycord)
+        blueghostcurrrow = row
+        blueghostcurrcol = col
+        orangeghostxcord = int(orangeghost.xcor())
+        orangeghostycord = int(orangeghost.ycor())
+        row, col = whichSquare(orangeghostxcord, orangeghostycord)
+        orangeghostcurrrow = row
+        orangeghostcurrcol = col
+        if pacmancurrrowd == redghostcurrrow and pacmancurrcold == redghostcurrcol:
+            deadcounter += 1
+        if pacmancurrrowd == pinkghostcurrrow and pacmancurrcold == pinkghostcurrcol:
+            deadcounter += 1
+        if pacmancurrrowd == blueghostcurrrow and pacmancurrcold == blueghostcurrcol:
+            deadcounter += 1
+        if pacmancurrrowd == orangeghostcurrrow and pacmancurrcold == orangeghostcurrcol:
+            deadcounter += 1
+        if deadcounter != 0:
+            lives -= 1
+            if lives != 0:
+                myWin.update()
+                time.sleep(1)
+                lostalife()
+                moveArrow()
+                myWin.update()
+                time.sleep(3)
+        if lives == 0:
+            myWin.clearscreen()
+            pacman.hideturtle()
+            pacman.color('black')
+            pacman.goto(-240, 0)
+            pacman.write('You lose, Your score was ' + str(score), font=("Times New Roman", 30, "normal"))
+            myWin.update()
+            time.sleep(5)
+            myWin.bye()
+    return
+
+
+def ghostdead():
+    global reddead, pinkdead, bluedead, orangedead, redtime, pinktime, bluetime, orangetime, ghostchasetimelol, ghostrunawayiepacmankill, score
+    if ghostrunawayiepacmankill == True:
+        succsession = 0
+        reddead1 = 0
+        pinkdead1 = 0
+        bluedead1 = 0
+        orangedead1 = 0
+        pacxcord = int(pacman.xcor())
+        pacycord = int(pacman.ycor())
+        row, col = whichSquare(pacxcord, pacycord)
+        pacmancurrrowd = row
+        pacmancurrcold = col
+        redghostxcord = int(redghost.xcor())
+        redghostycord = int(redghost.ycor())
+        row, col = whichSquare(redghostxcord, redghostycord)
+        redghostcurrrow = row
+        redghostcurrcol = col
+        pinkghostxcord = int(pinkghost.xcor())
+        pinkghostycord = int(pinkghost.ycor())
+        row, col = whichSquare(pinkghostxcord, pinkghostycord)
+        pinkghostcurrrow = row
+        pinkghostcurrcol = col
+        blueghostxcord = int(blueghost.xcor())
+        blueghostycord = int(blueghost.ycor())
+        row, col = whichSquare(blueghostxcord, blueghostycord)
+        blueghostcurrrow = row
+        blueghostcurrcol = col
+        orangeghostxcord = int(orangeghost.xcor())
+        orangeghostycord = int(orangeghost.ycor())
+        row, col = whichSquare(orangeghostxcord, orangeghostycord)
+        orangeghostcurrrow = row
+        orangeghostcurrcol = col
+        if pacmancurrrowd == redghostcurrrow and pacmancurrcold == redghostcurrcol:
+            reddead1 += 1
+        if pacmancurrrowd == pinkghostcurrrow and pacmancurrcold == pinkghostcurrcol:
+            pinkdead1 += 1
+        if pacmancurrrowd == blueghostcurrrow and pacmancurrcold == blueghostcurrcol:
+            bluedead1 += 1
+        if pacmancurrrowd == orangeghostcurrrow and pacmancurrcold == orangeghostcurrcol:
+            orangedead1 += 1
+        if reddead1 != 0:
+            reddead = True
+            redghost.goto(coordinates[16][14][0] - 12, coordinates[16][14][1])
+            redtime = time.time() + 7
+            if succsession == 0:
+                succsession = 1
+                score += 200
+            if succsession == 1:
+                succsession = 2
+                score += 400
+            if succsession == 2:
+                succsession = 3
+                score += 800
+            if succsession == 3:
+                score += 1600
+        if pinkdead1 != 0:
+            pinkdead = True
+            pinkghost.goto(coordinates[16][14][0] - 12, coordinates[16][14][1])
+            pinktime = time.time() + 7
+        if bluedead1 != 0:
+            bluedead = True
+            blueghost.goto(coordinates[16][14][0] - 12, coordinates[16][14][1])
+            bluetime = time.time() + 7
+        if orangedead1 != 0:
+            orangedead = True
+            orangeghost.goto(coordinates[16][14][0] - 12, coordinates[16][14][1])
+            orangetime = time.time() + 7
+    if reddead == True and time.time() > redtime:
+        redghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        reddead = False
+    if pinkdead == True and time.time() > pinktime:
+        pinkghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        pinkdead = False
+    if bluedead == True and time.time() > bluetime:
+        blueghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        bluedead = False
+    if orangedead == True and time.time() > orangetime:
+        orangeghost.goto(coordinates[14][14][0] - 12, coordinates[14][14][1])
+        orangedead = False
+    return
+
+
+def lostalife():
+    global powerorbsavalible
+    startrowredghost = 0
+    startcolredghost = 0
+    startrowpinkghost = 0
+    startcolpinkghost = 0
+    startrowblueghost = 0
+    startcolblueghost = 0
+    startroworangeghost = 0
+    startcolorangeghost = 0
+    # ----------------------------------
+    startrowpacman = 26
+    startcolpacman = 14
+    pacman.goto(coordinates[startrowpacman][startcolpacman][0] - 12, coordinates[startrowpacman][startcolpacman][1])
+    if powerorbsavalible >= 199:
+        startrowredghost = 14
+        startcolredghost = 14
+        startrowpinkghost = 17
+        startcolpinkghost = 14
+        startrowblueghost = 17
+        startcolblueghost = 12
+        startroworangeghost = 17
+        startcolorangeghost = 16
+    elif powerorbsavalible <= 198 and powerorbsavalible >= 151:
+        startrowredghost = 14
+        startcolredghost = 15
+        startrowpinkghost = 14
+        startcolpinkghost = 13
+        startrowblueghost = 17
+        startcolblueghost = 13
+        startroworangeghost = 17
+        startcolorangeghost = 15
+    elif powerorbsavalible <= 150 and powerorbsavalible >= 103:
+        startrowredghost = 14
+        startcolredghost = 15
+        startrowpinkghost = 14
+        startcolpinkghost = 13
+        startrowblueghost = 14
+        startcolblueghost = 17
+        startroworangeghost = 17
+        startcolorangeghost = 14
+    elif powerorbsavalible <= 102:
+        startrowredghost = 14
+        startcolredghost = 15
+        startrowpinkghost = 14
+        startcolpinkghost = 13
+        startrowblueghost = 14
+        startcolblueghost = 17
+        startroworangeghost = 14
+        startcolorangeghost = 11
+    redghost.goto(coordinates[startrowredghost][startcolredghost][0] - 12, coordinates[startrowredghost][startcolredghost][1])
+    pinkghost.goto(coordinates[startrowpinkghost][startcolpinkghost][0] - 12, coordinates[startrowpinkghost][startcolpinkghost][1])
+    blueghost.goto(coordinates[startrowblueghost][startcolblueghost][0] - 12, coordinates[startrowblueghost][startcolblueghost][1])
+    orangeghost.goto(coordinates[startroworangeghost][startcolorangeghost][0] - 12, coordinates[startroworangeghost][startcolorangeghost][1])
+    myWin.update()
+    # ------------ game variables --------------
+    pacmancurrrow = 26
+    pacmancurrcol = 14
+    ghostchasetimelol = False
+    timeforghostchase = 0
+    reddead = False
+    pinkdead = False
+    bluedead = False
+    orangedead = False
+    redtime = 0
+    pinktime = 0
+    bluetime = 0
+    orangetime = 0
+    # ----------------- other things ---------------
+    pacmenheading = 0
+    pacman.setheading(pacmenheading)
+    myWin.update()
+    return
+
+
+def newlevel():
+    global powerorbsavalible, powerorbs
+    powerorbsavalible = 0
+    powerorbs = []
+    for rowpo in range(36):
+        temppo = []
+        for colpo in range(28):
+            bigboi = False
+            if rowpo == 6 and colpo == 1 or rowpo == 6 and colpo == 26 or rowpo == 29 and colpo == 1 or rowpo == 29 and colpo == 26:
+                bigboi = True
+                pobig = turtle.Turtle()
+                pobig.penup()
+                pobig.speed(0)
+                pobig.color('pink')
+                pobig.shape('circle')
+                pobig.shapesize(0.8)
+                pobig.goto(coordinates[rowpo][colpo][0], coordinates[rowpo][colpo][1])
+                temppo.append(pobig)
+            else:
+                if rowpo == 0 or rowpo == 1 or rowpo == 2 or rowpo == 34 or rowpo == 35:
+                    temppo.append('0')
+                elif rowpo == 12 and colpo == 12 or rowpo == 12 and colpo == 15:
+                    temppo.append('0')
+                elif rowpo == 13 and colpo == 0 or rowpo == 13 and colpo == 1 or rowpo == 13 and colpo == 2 or rowpo == 13 and colpo == 3 or rowpo == 13 and colpo == 4 or rowpo == 13 and colpo == 12 or rowpo == 13 and colpo == 15 or rowpo == 13 and colpo == 23 or rowpo == 13 and colpo == 24 or rowpo == 13 and colpo == 25 or rowpo == 13 and colpo == 26 or rowpo == 13 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 14 and colpo == 0 or rowpo == 14 and colpo == 1 or rowpo == 14 and colpo == 2 or rowpo == 14 and colpo == 3 or rowpo == 14 and colpo == 4 or rowpo == 14 and colpo == 9 or rowpo == 14 and colpo == 10 or rowpo == 14 and colpo == 11 or rowpo == 14 and colpo == 12 or rowpo == 14 and colpo == 13 or rowpo == 14 and colpo == 14 or rowpo == 14 and colpo == 15 or rowpo == 14 and colpo == 16 or rowpo == 14 and colpo == 17 or rowpo == 14 and colpo == 18 or rowpo == 14 and colpo == 23 or rowpo == 14 and colpo == 24 or rowpo == 14 and colpo == 25 or rowpo == 14 and colpo == 26 or rowpo == 14 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 15 and colpo == 0 or rowpo == 15 and colpo == 1 or rowpo == 15 and colpo == 2 or rowpo == 15 and colpo == 3 or rowpo == 15 and colpo == 4 or rowpo == 15 and colpo == 9 or rowpo == 15 and colpo == 10 or rowpo == 15 and colpo == 11 or rowpo == 15 and colpo == 12 or rowpo == 15 and colpo == 13 or rowpo == 15 and colpo == 14 or rowpo == 15 and colpo == 15 or rowpo == 15 and colpo == 16 or rowpo == 15 and colpo == 17 or rowpo == 15 and colpo == 18 or rowpo == 15 and colpo == 23 or rowpo == 15 and colpo == 24 or rowpo == 15 and colpo == 25 or rowpo == 15 and colpo == 26 or rowpo == 15 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 16 and colpo == 9 or rowpo == 16 and colpo == 10 or rowpo == 16 and colpo == 11 or rowpo == 16 and colpo == 12 or rowpo == 16 and colpo == 13 or rowpo == 16 and colpo == 14 or rowpo == 16 and colpo == 15 or rowpo == 16 and colpo == 16 or rowpo == 16 and colpo == 17 or rowpo == 16 and colpo == 18:
+                    temppo.append('0')
+                elif rowpo == 17 and colpo == 0 or rowpo == 17 and colpo == 1 or rowpo == 17 and colpo == 2 or rowpo == 17 and colpo == 3 or rowpo == 17 and colpo == 4 or rowpo == 17 and colpo == 5 or rowpo == 17 and colpo == 7 or rowpo == 17 and colpo == 8 or rowpo == 17 and colpo == 9 or rowpo == 17 and colpo == 10 or rowpo == 17 and colpo == 11 or rowpo == 17 and colpo == 12 or rowpo == 17 and colpo == 13 or rowpo == 17 and colpo == 14 or rowpo == 17 and colpo == 15 or rowpo == 17 and colpo == 16 or rowpo == 17 and colpo == 17 or rowpo == 17 and colpo == 18 or rowpo == 17 and colpo == 19 or rowpo == 17 and colpo == 20 or rowpo == 17 and colpo == 22 or rowpo == 17 and colpo == 23 or rowpo == 17 and colpo == 24 or rowpo == 17 and colpo == 25 or rowpo == 17 and colpo == 26 or rowpo == 17 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 18 and colpo == 9 or rowpo == 18 and colpo == 10 or rowpo == 18 and colpo == 11 or rowpo == 18 and colpo == 12 or rowpo == 18 and colpo == 13 or rowpo == 18 and colpo == 14 or rowpo == 18 and colpo == 15 or rowpo == 18 and colpo == 16 or rowpo == 18 and colpo == 17 or rowpo == 18 and colpo == 18:
+                    temppo.append('0')
+                elif rowpo == 19 and colpo == 0 or rowpo == 19 and colpo == 1 or rowpo == 19 and colpo == 2 or rowpo == 19 and colpo == 3 or rowpo == 19 and colpo == 4 or rowpo == 19 and colpo == 9 or rowpo == 19 and colpo == 10 or rowpo == 19 and colpo == 11 or rowpo == 19 and colpo == 12 or rowpo == 19 and colpo == 13 or rowpo == 19 and colpo == 14 or rowpo == 19 and colpo == 15 or rowpo == 19 and colpo == 16 or rowpo == 19 and colpo == 17 or rowpo == 19 and colpo == 18 or rowpo == 19 and colpo == 23 or rowpo == 19 and colpo == 24 or rowpo == 19 and colpo == 25 or rowpo == 19 and colpo == 26 or rowpo == 19 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 20 and colpo == 0 or rowpo == 20 and colpo == 1 or rowpo == 20 and colpo == 2 or rowpo == 20 and colpo == 3 or rowpo == 20 and colpo == 4 or rowpo == 20 and colpo == 9 or rowpo == 20 and colpo == 10 or rowpo == 20 and colpo == 11 or rowpo == 20 and colpo == 12 or rowpo == 20 and colpo == 13 or rowpo == 20 and colpo == 14 or rowpo == 20 and colpo == 15 or rowpo == 20 and colpo == 16 or rowpo == 20 and colpo == 17 or rowpo == 20 and colpo == 18 or rowpo == 20 and colpo == 23 or rowpo == 20 and colpo == 24 or rowpo == 20 and colpo == 25 or rowpo == 20 and colpo == 26 or rowpo == 20 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 21 and colpo == 0 or rowpo == 21 and colpo == 1 or rowpo == 21 and colpo == 2 or rowpo == 21 and colpo == 3 or rowpo == 21 and colpo == 4 or rowpo == 21 and colpo == 9 or rowpo == 21 and colpo == 10 or rowpo == 21 and colpo == 11 or rowpo == 21 and colpo == 12 or rowpo == 21 and colpo == 13 or rowpo == 21 and colpo == 14 or rowpo == 21 and colpo == 15 or rowpo == 21 and colpo == 16 or rowpo == 21 and colpo == 17 or rowpo == 21 and colpo == 18 or rowpo == 21 and colpo == 23 or rowpo == 21 and colpo == 24 or rowpo == 21 and colpo == 25 or rowpo == 21 and colpo == 26 or rowpo == 21 and colpo == 27:
+                    temppo.append('0')
+                elif rowpo == 22 and colpo == 9 or rowpo == 22 and colpo == 10 or rowpo == 22 and colpo == 11 or rowpo == 22 and colpo == 12 or rowpo == 22 and colpo == 13 or rowpo == 22 and colpo == 14 or rowpo == 22 and colpo == 15 or rowpo == 22 and colpo == 16 or rowpo == 22 and colpo == 17 or rowpo == 22 and colpo == 18:
+                    temppo.append('0')
+                else:
+                    if map[rowpo][colpo] == '0' and bigboi == False:
+                        po = turtle.Turtle()
+                        po.penup()
+                        po.speed(0)
+                        po.color('pink')
+                        po.shape('circle')
+                        po.shapesize(0.2)
+                        po.goto(coordinates[rowpo][colpo][0], coordinates[rowpo][colpo][1])
+                        temppo.append(po)
+                    else:
+                        temppo.append('0')
+        powerorbs.append(temppo)
+    for r in range(36):
+        for c in range(28):
+            if powerorbs[r][c] != '0':
+                powerorbsavalible += 1
+    # ----------------------------------
+    startrowpacman = 26
+    startcolpacman = 14
+    pacman.goto(coordinates[startrowpacman][startcolpacman][0] - 12, coordinates[startrowpacman][startcolpacman][1])
+    startrowredghost = 14
+    startcolredghost = 14
+    redghost.goto(coordinates[startrowredghost][startcolredghost][0] - 12, coordinates[startrowredghost][startcolredghost][1])
+    startrowpinkghost = 17  # 17
+    startcolpinkghost = 14  # 14
+    pinkghost.goto(coordinates[startrowpinkghost][startcolpinkghost][0] - 12, coordinates[startrowpinkghost][startcolpinkghost][1])
+    startrowblueghost = 17  # 17
+    startcolblueghost = 12  # 12
+    blueghost.goto(coordinates[startrowblueghost][startcolblueghost][0] - 12, coordinates[startrowblueghost][startcolblueghost][1])
+    startroworangeghost = 17  # 17
+    startcolorangeghost = 16  # 16
+    orangeghost.goto(coordinates[startroworangeghost][startcolorangeghost][0] - 12, coordinates[startroworangeghost][startcolorangeghost][1])
+    myWin.update()
+    # -------------------------------------------------
+    global pacmancurrrow, pacmancurrcol, ghostchase, ghostscatter, ghostrunawayiepacmankill, timeformodes, ghostchasetimelol, timeforghostchase, reddead, pinkdead, bluedead, orangedead, redtime, pinktime, bluetime, orangetime
+    pacmancurrrow = 26
+    pacmancurrcol = 14
+    ghostchase = False
+    ghostscatter = True
+    ghostrunawayiepacmankill = False
+    timeformodes = time.time()
+    ghostchasetimelol = False
+    timeforghostchase = 0
+    reddead = False
+    pinkdead = False
+    bluedead = False
+    orangedead = False
+    redtime = 0
+    pinktime = 0
+    bluetime = 0
+    orangetime = 0
+    global chc, stc, orc, apc, mlc
+    chc = 0
+    stc = 0
+    orc = 0
+    apc = 0
+    mlc = 0
+    cherry.goto(10000, 10000)
+    starwberry.goto(10000, 10000)
+    orange.goto(10000, 10000)
+    apple.goto(10000, 10000)
+    melon.goto(10000, 10000)
+    return
+
+
+def spawnfruit():
+    global pacmancurrrow, pacmancurrcol, score, cherryxcor, cherryycor, chc, starwberryxcor, starwberryycor, stc, orangexcor, orangeycor, orc, applexcor, appleycor, apc, melonxcor, melonycor, mlc
+    cordsforfruit = [[4, 3], [4, 15], [5, 26], [15, 6], [11, 17], [20, 13], [20, 21], [26, 24], [29, 2], [32, 13]]
+    cherryodds = random.randint(1, 100)
+    starwberryodds = random.randint(1, 200)
+    orangeodds = random.randint(1, 300)
+    appleodds = random.randint(1, 400)
+    melonodds = random.randint(1, 500)
+    if cherryodds == 25 and chc != 1:
+        b = random.randint(0, 9)
+        cherryxcor = cordsforfruit[b][0]
+        cherryycor = cordsforfruit[b][1]
+        cherry.goto(coordinates[cherryxcor][cherryycor][0], coordinates[cherryxcor][cherryycor][1])
+        chc = 1
+    if starwberryodds == 25 and stc != 1:
+        b = random.randint(0, 9)
+        starwberryxcor = cordsforfruit[b][0]
+        starwberryycor = cordsforfruit[b][1]
+        starwberry.goto(coordinates[starwberryxcor][starwberryycor][0], coordinates[starwberryxcor][starwberryycor][1])
+        stc = 1
+    if orangeodds == 25 and orc != 1:
+        b = random.randint(0, 9)
+        orangexcor = cordsforfruit[b][0]
+        orangeycor = cordsforfruit[b][1]
+        orange.goto(coordinates[orangexcor][orangeycor][0], coordinates[orangexcor][orangeycor][1])
+        orc = 1
+    if appleodds == 25 and apc != 1:
+        b = random.randint(0, 9)
+        applexcor = cordsforfruit[b][0]
+        appleycor = cordsforfruit[b][1]
+        apple.goto(coordinates[applexcor][appleycor][0], coordinates[applexcor][appleycor][1])
+        apc = 1
+    if melonodds == 25 and mlc != 1:
+        b = random.randint(0, 9)
+        melonxcor = cordsforfruit[b][0]
+        melonycor = cordsforfruit[b][1]
+        melon.goto(coordinates[melonxcor][melonycor][0], coordinates[melonxcor][melonycor][1])
+        mlc = 1
+    if pacmancurrrow == cherryxcor and pacmancurrcol == cherryycor and chc == 1:
+        cherry.goto(10000, 10000)
+        score += 100
+        chc = 0
+    if pacmancurrrow == starwberryxcor and pacmancurrcol == starwberryycor and stc == 1:
+        starwberry.goto(10000, 10000)
+        score += 300
+        stc = 0
+    if pacmancurrrow == orangexcor and pacmancurrcol == orangeycor and orc == 1:
+        orange.goto(10000, 10000)
+        score += 500
+        orc = 0
+    if pacmancurrrow == applexcor and pacmancurrcol == appleycor and apc == 1:
+        apple.goto(10000, 10000)
+        score += 700
+        apc = 0
+    if pacmancurrrow == melonxcor and pacmancurrcol == melonycor and mlc == 1:
+        melon.goto(10000, 10000)
+        score += 1000
+        mlc = 0
+    return
+
+
+# --------------- window and grid turtle -------------------
+turtle.setup(696, 888)
+myWin = turtle.Screen()
+myWin.title('Pac-Men')
+myWin.bgcolor('black')
+myWin.tracer(0, 0)
+gridSquare = turtle.Turtle()
+gridSquare.hideturtle()
+gridSquare.penup()
+gridSquare.speed(0)
+gridSquare.color('black')
+gridSquare.pencolor('black')
+gridSquare.shape('square')
+gridSquare.pensize(1)
+gridSquare.shapesize(1.2)
+scoreturt = turtle.Turtle()
+scoreturt.penup()
+scoreturt.speed(0)
+scoreturt.color('white')
+scoreturt.hideturtle()
+highscoreturt = turtle.Turtle()
+highscoreturt.penup()
+highscoreturt.speed(0)
+highscoreturt.color('white')
+highscoreturt.hideturtle()
+livesturt = turtle.Turtle()
+livesturt.penup()
+livesturt.speed(0)
+livesturt.color('white')
+livesturt.hideturtle()
+modeturt = turtle.Turtle()
+modeturt.penup()
+modeturt.speed(0)
+modeturt.color('white')
+modeturt.hideturtle()
+levelturt = turtle.Turtle()
+levelturt.penup()
+levelturt.speed(0)
+levelturt.color('white')
+levelturt.hideturtle()
+# ---------------------draw grid outline -----------------------
+gridSquare.goto(-339, 436)
+gridSquare.pendown()
+gridSquare.goto(333, 436)
+gridSquare.goto(333, -428)
+gridSquare.goto(-339, -428)
+gridSquare.goto(-339, 436)
+gridSquare.penup()
+myWin.update()
+# -----------now draw the grid and store the coordinates-----------
+coordinates = []
+ygridcord = 448
+xgridcord = -351
+gridSquare.goto(xgridcord, ygridcord)
+for gridrow in range(36):
+    xgridcord = -351
+    ygridcord -= 24
+    gridSquare.goto(xgridcord, ygridcord)
+    temp = []
+    for gridcol in range(28):
+        xgridcord += 24
+        gridSquare.goto(xgridcord, ygridcord)
+        temp.append((xgridcord, ygridcord))
+        gridSquare.stamp()
+    coordinates.append(temp)
+myWin.update()
+# -------------- putting in blue and pink in map ---------
+map = []
+readMap()
+useMap()
+# ------------- ghost creation -------------
+redghost = turtle.Turtle()
+redghost.speed(0)
+redghost.color('red')
+redghost.shape('circle')
+redghost.shapesize(1.2)
+redghost.penup()
+redghostspeed = 12
+redghostheading = 0
+redghost.setheading(redghostheading)
+im1 = 'Safeimagekit-resized-img (1).gif'
+myWin.addshape(im1)
+redghost.shape(im1)
+pinkghost = turtle.Turtle()
+pinkghost.speed(0)
+pinkghost.color('pink')
+pinkghost.shape('circle')
+pinkghost.shapesize(1.2)
+pinkghost.penup()
+pinkghostspeed = 12
+pinkghostheading = 0
+pinkghost.setheading(pinkghostheading)
+im2 = 'Safeimagekit-resized-img (2).gif'
+myWin.addshape(im2)
+pinkghost.shape(im2)
+blueghost = turtle.Turtle()
+blueghost.speed(0)
+blueghost.color('blue')
+blueghost.shape('circle')
+blueghost.shapesize(1.2)
+blueghost.penup()
+blueghostspeed = 12
+blueghostheading = 0
+blueghost.setheading(blueghostheading)
+im3 = 'Safeimagekit-resized-img (3).gif'
+myWin.addshape(im3)
+blueghost.shape(im3)
+orangeghost = turtle.Turtle()
+orangeghost.speed(0)
+orangeghost.color('orange')
+orangeghost.shape('circle')
+orangeghost.shapesize(1.2)
+orangeghost.penup()
+orangeghostspeed = 12
+orangeghostheading = 0
+orangeghost.setheading(orangeghostheading)
+im4 = 'Safeimagekit-resized-img (4).gif'
+myWin.addshape(im4)
+orangeghost.shape(im4)
+melon = turtle.Turtle()
+melon.shape('circle')
+melon.shapesize(1.2)
+melon.penup()
+melon.speed(0)
+melon.goto(10000, 10000)
+im5 = 'Safeimagekit-resized-img (5).gif'
+myWin.addshape(im5)
+melon.shape(im5)
+apple = turtle.Turtle()
+apple.shape('circle')
+apple.shapesize(1.2)
+apple.penup()
+apple.speed(0)
+im6 = 'Safeimagekit-resized-img (6).gif'
+myWin.addshape(im6)
+apple.shape(im6)
+apple.goto(10000, 10000)
+orange = turtle.Turtle()
+orange.shape('circle')
+orange.shapesize(1.2)
+orange.penup()
+orange.speed(0)
+orange.goto(10000, 10000)
+im7 = 'Safeimagekit-resized-img (7).gif'
+myWin.addshape(im7)
+orange.shape(im7)
+starwberry = turtle.Turtle()
+starwberry.shape('circle')
+starwberry.shapesize(1.2)
+starwberry.penup()
+starwberry.speed(0)
+starwberry.goto(10000, 10000)
+im8 = 'Safeimagekit-resized-img (8).gif'
+myWin.addshape(im8)
+starwberry.shape(im8)
+cherry = turtle.Turtle()
+cherry.shape('circle')
+cherry.shapesize(1.2)
+cherry.penup()
+cherry.speed(0)
+cherry.goto(10000, 10000)
+im9 = 'Safeimagekit-resized-img (9).gif'
+myWin.addshape(im9)
+cherry.shape(im9)
+# ------------- pacman creation -----------------------
+pacman = turtle.Turtle()
+pacman.speed(0)
+pacman.color('yellow')
+pacman.shape('circle')
+pacman.shapesize(1.2)
+pacman.penup()
+pacmanspeed = 12
+pacmenheading = 0
+pacman.setheading(pacmenheading)
+im = 'Safeimagekit-resized-img.gif'
+myWin.addshape(im)
+pacman.shape(im)
+arrow = turtle.Turtle()
+arrow.speed(0)
+arrow.color('yellow')
+arrow.shape('triangle')
+arrow.shapesize(0.4)
+arrow.penup()
+arrow.hideturtle()
+# -------------- make and create power pellets ---------
+powerorbsavalible = 0
+powerorbs = []
+for rowpo in range(36):
+    temppo = []
+    for colpo in range(28):
+        bigboi = False
+        if rowpo == 6 and colpo == 1 or rowpo == 6 and colpo == 26 or rowpo == 29 and colpo == 1 or rowpo == 29 and colpo == 26:
+            bigboi = True
+            pobig = turtle.Turtle()
+            pobig.penup()
+            pobig.speed(0)
+            pobig.color('pink')
+            pobig.shape('circle')
+            pobig.shapesize(0.8)
+            pobig.goto(coordinates[rowpo][colpo][0], coordinates[rowpo][colpo][1])
+            temppo.append(pobig)
+        else:
+            if rowpo == 0 or rowpo == 1 or rowpo == 2 or rowpo == 34 or rowpo == 35:
+                temppo.append('0')
+            elif rowpo == 12 and colpo == 12 or rowpo == 12 and colpo == 15:
+                temppo.append('0')
+            elif rowpo == 13 and colpo == 0 or rowpo == 13 and colpo == 1 or rowpo == 13 and colpo == 2 or rowpo == 13 and colpo == 3 or rowpo == 13 and colpo == 4 or rowpo == 13 and colpo == 12 or rowpo == 13 and colpo == 15 or rowpo == 13 and colpo == 23 or rowpo == 13 and colpo == 24 or rowpo == 13 and colpo == 25 or rowpo == 13 and colpo == 26 or rowpo == 13 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 14 and colpo == 0 or rowpo == 14 and colpo == 1 or rowpo == 14 and colpo == 2 or rowpo == 14 and colpo == 3 or rowpo == 14 and colpo == 4 or rowpo == 14 and colpo == 9 or rowpo == 14 and colpo == 10 or rowpo == 14 and colpo == 11 or rowpo == 14 and colpo == 12 or rowpo == 14 and colpo == 13 or rowpo == 14 and colpo == 14 or rowpo == 14 and colpo == 15 or rowpo == 14 and colpo == 16 or rowpo == 14 and colpo == 17 or rowpo == 14 and colpo == 18 or rowpo == 14 and colpo == 23 or rowpo == 14 and colpo == 24 or rowpo == 14 and colpo == 25 or rowpo == 14 and colpo == 26 or rowpo == 14 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 15 and colpo == 0 or rowpo == 15 and colpo == 1 or rowpo == 15 and colpo == 2 or rowpo == 15 and colpo == 3 or rowpo == 15 and colpo == 4 or rowpo == 15 and colpo == 9 or rowpo == 15 and colpo == 10 or rowpo == 15 and colpo == 11 or rowpo == 15 and colpo == 12 or rowpo == 15 and colpo == 13 or rowpo == 15 and colpo == 14 or rowpo == 15 and colpo == 15 or rowpo == 15 and colpo == 16 or rowpo == 15 and colpo == 17 or rowpo == 15 and colpo == 18 or rowpo == 15 and colpo == 23 or rowpo == 15 and colpo == 24 or rowpo == 15 and colpo == 25 or rowpo == 15 and colpo == 26 or rowpo == 15 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 16 and colpo == 9 or rowpo == 16 and colpo == 10 or rowpo == 16 and colpo == 11 or rowpo == 16 and colpo == 12 or rowpo == 16 and colpo == 13 or rowpo == 16 and colpo == 14 or rowpo == 16 and colpo == 15 or rowpo == 16 and colpo == 16 or rowpo == 16 and colpo == 17 or rowpo == 16 and colpo == 18:
+                temppo.append('0')
+            elif rowpo == 17 and colpo == 0 or rowpo == 17 and colpo == 1 or rowpo == 17 and colpo == 2 or rowpo == 17 and colpo == 3 or rowpo == 17 and colpo == 4 or rowpo == 17 and colpo == 5 or rowpo == 17 and colpo == 7 or rowpo == 17 and colpo == 8 or rowpo == 17 and colpo == 9 or rowpo == 17 and colpo == 10 or rowpo == 17 and colpo == 11 or rowpo == 17 and colpo == 12 or rowpo == 17 and colpo == 13 or rowpo == 17 and colpo == 14 or rowpo == 17 and colpo == 15 or rowpo == 17 and colpo == 16 or rowpo == 17 and colpo == 17 or rowpo == 17 and colpo == 18 or rowpo == 17 and colpo == 19 or rowpo == 17 and colpo == 20 or rowpo == 17 and colpo == 22 or rowpo == 17 and colpo == 23 or rowpo == 17 and colpo == 24 or rowpo == 17 and colpo == 25 or rowpo == 17 and colpo == 26 or rowpo == 17 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 18 and colpo == 9 or rowpo == 18 and colpo == 10 or rowpo == 18 and colpo == 11 or rowpo == 18 and colpo == 12 or rowpo == 18 and colpo == 13 or rowpo == 18 and colpo == 14 or rowpo == 18 and colpo == 15 or rowpo == 18 and colpo == 16 or rowpo == 18 and colpo == 17 or rowpo == 18 and colpo == 18:
+                temppo.append('0')
+            elif rowpo == 19 and colpo == 0 or rowpo == 19 and colpo == 1 or rowpo == 19 and colpo == 2 or rowpo == 19 and colpo == 3 or rowpo == 19 and colpo == 4 or rowpo == 19 and colpo == 9 or rowpo == 19 and colpo == 10 or rowpo == 19 and colpo == 11 or rowpo == 19 and colpo == 12 or rowpo == 19 and colpo == 13 or rowpo == 19 and colpo == 14 or rowpo == 19 and colpo == 15 or rowpo == 19 and colpo == 16 or rowpo == 19 and colpo == 17 or rowpo == 19 and colpo == 18 or rowpo == 19 and colpo == 23 or rowpo == 19 and colpo == 24 or rowpo == 19 and colpo == 25 or rowpo == 19 and colpo == 26 or rowpo == 19 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 20 and colpo == 0 or rowpo == 20 and colpo == 1 or rowpo == 20 and colpo == 2 or rowpo == 20 and colpo == 3 or rowpo == 20 and colpo == 4 or rowpo == 20 and colpo == 9 or rowpo == 20 and colpo == 10 or rowpo == 20 and colpo == 11 or rowpo == 20 and colpo == 12 or rowpo == 20 and colpo == 13 or rowpo == 20 and colpo == 14 or rowpo == 20 and colpo == 15 or rowpo == 20 and colpo == 16 or rowpo == 20 and colpo == 17 or rowpo == 20 and colpo == 18 or rowpo == 20 and colpo == 23 or rowpo == 20 and colpo == 24 or rowpo == 20 and colpo == 25 or rowpo == 20 and colpo == 26 or rowpo == 20 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 21 and colpo == 0 or rowpo == 21 and colpo == 1 or rowpo == 21 and colpo == 2 or rowpo == 21 and colpo == 3 or rowpo == 21 and colpo == 4 or rowpo == 21 and colpo == 9 or rowpo == 21 and colpo == 10 or rowpo == 21 and colpo == 11 or rowpo == 21 and colpo == 12 or rowpo == 21 and colpo == 13 or rowpo == 21 and colpo == 14 or rowpo == 21 and colpo == 15 or rowpo == 21 and colpo == 16 or rowpo == 21 and colpo == 17 or rowpo == 21 and colpo == 18 or rowpo == 21 and colpo == 23 or rowpo == 21 and colpo == 24 or rowpo == 21 and colpo == 25 or rowpo == 21 and colpo == 26 or rowpo == 21 and colpo == 27:
+                temppo.append('0')
+            elif rowpo == 22 and colpo == 9 or rowpo == 22 and colpo == 10 or rowpo == 22 and colpo == 11 or rowpo == 22 and colpo == 12 or rowpo == 22 and colpo == 13 or rowpo == 22 and colpo == 14 or rowpo == 22 and colpo == 15 or rowpo == 22 and colpo == 16 or rowpo == 22 and colpo == 17 or rowpo == 22 and colpo == 18:
+                temppo.append('0')
+            else:
+                if map[rowpo][colpo] == '0' and bigboi == False:
+                    po = turtle.Turtle()
+                    po.penup()
+                    po.speed(0)
+                    po.color('pink')
+                    po.shape('circle')
+                    po.shapesize(0.2)
+                    po.goto(coordinates[rowpo][colpo][0], coordinates[rowpo][colpo][1])
+                    temppo.append(po)
+                else:
+                    temppo.append('0')
+    powerorbs.append(temppo)
+for r in range(36):
+    for c in range(28):
+        if powerorbs[r][c] != '0':
+            powerorbsavalible += 1
+# ---------- putting pacman and ghosts in right spots -----------q
+startrowpacman = 26
+startcolpacman = 14
+pacman.goto(coordinates[startrowpacman][startcolpacman][0] - 12, coordinates[startrowpacman][startcolpacman][1])
+startrowredghost = 14
+startcolredghost = 14
+redghost.goto(coordinates[startrowredghost][startcolredghost][0] - 12, coordinates[startrowredghost][startcolredghost][1])
+startrowpinkghost = 17  # 17
+startcolpinkghost = 14  # 14
+pinkghost.goto(coordinates[startrowpinkghost][startcolpinkghost][0] - 12, coordinates[startrowpinkghost][startcolpinkghost][1])
+startrowblueghost = 17  # 17
+startcolblueghost = 12  # 12
+blueghost.goto(coordinates[startrowblueghost][startcolblueghost][0] - 12, coordinates[startrowblueghost][startcolblueghost][1])
+startroworangeghost = 17  # 17
+startcolorangeghost = 16  # 16
+orangeghost.goto(coordinates[startroworangeghost][startcolorangeghost][0] - 12, coordinates[startroworangeghost][startcolorangeghost][1])
+startrowscore = 1
+startcolscore = 3
+scoreturt.goto(coordinates[startrowscore][startcolscore][0], coordinates[startrowscore][startcolscore][1] - 12)
+startrowhighscore = 1
+startcolhighscore = 10
+highscoreturt.goto(coordinates[startrowhighscore][startcolhighscore][0], coordinates[startrowhighscore][startcolhighscore][1] - 12)
+startrowleveli = 35
+startcolleveli = 1
+livesturt.goto(coordinates[startrowleveli][startcolleveli][0] + 12, coordinates[startrowleveli][startcolleveli][1] - 12)
+modeturt.goto(coordinates[35][10][0], coordinates[35][10][1] - 12)
+levelturt.goto(coordinates[1][20][0], coordinates[1][20][1] - 12)
+myWin.update()
+# ------------ game variables --------------
+quitFlag = False
+pacmancurrrow = 26
+pacmancurrcol = 14
+score = 0
+ghostchase = False
+ghostscatter = True
+ghostrunawayiepacmankill = False
+timeformodes = time.time()
+timer1 = True
+timer2 = True
+timer3 = True
+timer4 = True
+timer5 = True
+timer6 = True
+timer7 = True
+timer8 = True
+timer9 = True
+ghostchasetimelol = False
+timeforghostchase = 0
+reddead = False
+pinkdead = False
+bluedead = False
+orangedead = False
+redtime = 0
+pinktime = 0
+bluetime = 0
+orangetime = 0
+lives = 3
+chc = 0
+stc = 0
+orc = 0
+apc = 0
+mlc = 0
+cherryxcor = 0
+cherryycor = 0
+starwberryxcor = 0
+starwberryycor = 0
+orangexcor = 0
+orangeycor = 0
+applexcor = 0
+appleycor = 0
+melonxcor = 0
+melonycor = 0
+# ------------------ highscore -------------
+try:
+    with open('score.dat', 'rb') as file:
+        highscore = pickle.load(file)
+except:
+    highscore = 0
+# ---------------------------event handlers---------------
+myWin.listen()
+myWin.onkey(leave, "q")
+myWin.onkey(turnUp, 'Up')
+myWin.onkey(turnDown, 'Down')
+myWin.onkey(turnLeft, 'Left')
+myWin.onkey(turnRight, 'Right')
+myWin.onkeypress(turnUphold, 'Up')
+myWin.onkeypress(turnDownhold, 'Down')
+myWin.onkeypress(turnLefthold, 'Left')
+myWin.onkeypress(turnRighthold, 'Right')
+# -------------------------- framerate managment ------------------
+refreshRate = 120
+myWin.tracer(0, 0)
+refreshTime = time.time()
+# ------------------------- gameloop ----------------------
+time.sleep(3)
+ghostmovementflag = True
+while quitFlag == False:
+    if time.time() - refreshTime >= 1 / refreshRate:
+        timerforghosts()
+        movePacMan()
+        moveArrow()
+        if ghostmovementflag == True:
+            moveRedGhost()
+            if powerorbsavalible <= 198:
+                movePinkGhost()
+            if powerorbsavalible <= 150:
+                moveBlueGhost()
+            if powerorbsavalible <= 102:
+                moveOrangeGhost()
+        pacmandead()
+        ghostdead()
+        topBarupdates()
+        spawnfruit()
+        myWin.update()
+        if ghostmovementflag == False:
+            ghostmovementflag = True
+        else:
+            ghostmovementflag = False
+        if score > highscore:
+            with open('score.dat', 'wb') as file:
+                pickle.dump(score, file)
+        refreshTime = time.time()
+myWin.bye()
